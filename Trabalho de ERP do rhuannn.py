@@ -222,6 +222,103 @@ def mostrar_relatorio():
     print(f"Total de produtos diferentes cadastrados: {len(produtos)}")
     print(f"Custo Total de Estoque (Relatório Gerencial): R$ {total_custo_estoque:.2f}")
 
+def gerar_dashboard_todos():
+    print("\n--- Dashboards de Acompanhamento  ---")
+    
+    conn = conectar_bd()
+    cursor = conn.cursor()
+    
+    print("Criando 1/3: Curva ABC (Custos)...")
+    cursor.execute("""
+        SELECT categoria, SUM(preco * quantidade) as custo_total
+        FROM produtos
+        GROUP BY categoria
+        ORDER BY custo_total DESC
+    """)
+    dados_abc = cursor.fetchall()
+    
+    if dados_abc:
+        categorias = [d[0] for d in dados_abc]
+        custos = [d[1] for d in dados_abc]
+        
+        plt.figure(figsize=(8, 5))
+        plt.bar(categorias, custos, color='#1f77b4', alpha=0.8)
+        plt.title('Dashboard 1: Curva ABC (Custo por Categoria)')
+        plt.xlabel('Categoria do Produto')
+        plt.ylabel('Custo Total em Estoque (R$)')
+        plt.xticks(rotation=45, ha='right')
+        plt.grid(axis='y', linestyle='--')
+        plt.tight_layout()
+        plt.savefig('dashboard_1_curva_abc_custo.png')
+        plt.show()
+    else:
+        print("  [AVISO] Sem dados de custo para Curva ABC.")
+
+    print("Criando 2/3: Comparação de Quantidade...")
+    cursor.execute("""
+        SELECT categoria, SUM(quantidade) as quantidade_total
+        FROM produtos
+        GROUP BY categoria
+        ORDER BY quantidade_total DESC
+    """)
+    dados_qtd = cursor.fetchall()
+
+    if dados_qtd:
+        categorias_qtd = [d[0] for d in dados_qtd]
+        quantidades = [d[1] for d in dados_qtd]
+        
+        plt.figure(figsize=(8, 5))
+        plt.bar(categorias_qtd, quantidades, color='green', alpha=0.8)
+        plt.title('Dashboard 2: Comparação de Quantidade por Categoria')
+        plt.xlabel('Categoria do Produto')
+        plt.ylabel('Quantidade Total em Estoque')
+        plt.xticks(rotation=45, ha='right')
+        plt.grid(axis='y', linestyle='--')
+        plt.tight_layout()
+        plt.savefig('dashboard_2_comparacao_quantidade.png')
+        plt.show()
+    else:
+        print("  [AVISO] Sem dados de quantidade para comparação.")
+
+    print("Criando 3/3: Evolução do Estoque ...")
+    cursor.execute("SELECT data_movimentacao, tipo, quantidade FROM movimentacoes ORDER BY data_movimentacao")
+    movimentacoes = cursor.fetchall()
+    conn.close()
+    
+    if movimentacoes:
+        historico_diario = {} 
+        formato_data = "%Y-%m-%d %H:%M:%S"
+        estoque_atual = 0 
+        
+        for data_hora_str, tipo, quantidade in movimentacoes:
+            data_dia = datetime.strptime(data_hora_str, formato_data).date()
+            
+            if tipo == 'ENTRADA':
+                estoque_atual += quantidade
+            else:
+                estoque_atual -= quantidade
+            
+            historico_diario[data_dia] = estoque_atual 
+
+        datas = sorted(historico_diario.keys())
+        valores_estoque = [historico_diario[data] for data in datas]
+        datas_str = [data.strftime("%Y-%m-%d") for data in datas]
+
+        plt.figure(figsize=(10, 6))
+        plt.plot(datas_str, valores_estoque, marker='o', color='purple', linestyle='-')
+        plt.title('Dashboard 3: Evolução do Estoque Total ')
+        plt.xlabel('Data da Movimentação')
+        plt.ylabel('Estoque Total (Unidades)')
+        plt.xticks(rotation=45, ha='right')
+        plt.grid(axis='both', linestyle=':')
+        plt.tight_layout()
+        plt.savefig('dashboard_3_evolucao.png')
+        plt.show()
+    else:
+        print("  [AVISO] Sem histórico de movimentações para Evolução do Estoque.")
+        
+    print("\nTodos os três Dashboards foram salvos no diretório.")
+
 def exibir_menu():
     print("\n--- Sistema ERP de Estoque ------------------")
     print("1. Cadastrar Produto")
