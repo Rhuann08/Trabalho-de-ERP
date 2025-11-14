@@ -87,6 +87,50 @@ def registrar_movimentacao(produto_id, tipo, quantidade):
     conn.commit()
     conn.close()
 
+def atualizar_quantidade(id_produto, quantidade_movimentada, data_saida_manual=None):
+    conn = conectar_bd()
+    cursor = conn.cursor()
+    
+    cursor.execute("SELECT quantidade FROM produtos WHERE id = ?", (id_produto,))
+    resultado = cursor.fetchone()
+
+    if resultado is None:
+        print(f"Erro: Produto com ID {id_produto} não encontrado.")
+        conn.close()
+        return False
+
+    nova_quantidade = resultado[0] + quantidade_movimentada
+    
+    if nova_quantidade < 0:
+        print("Erro: Saldo insuficiente em estoque.")
+        conn.close()
+        return False
+        
+    query = "UPDATE produtos SET quantidade = ?"
+    params = [nova_quantidade]
+    
+    if quantidade_movimentada < 0:
+        if data_saida_manual:
+             data_saida_final = data_saida_manual + " 00:00:00"
+        else:
+             data_saida_final = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+        query += ", data_ultima_saida = ?"
+        params.append(data_saida_final)
+        
+        registrar_movimentacao(id_produto, 'SAIDA', abs(quantidade_movimentada))
+        
+    elif quantidade_movimentada > 0:
+        registrar_movimentacao(id_produto, 'ENTRADA', quantidade_movimentada)
+        
+    query += " WHERE id = ?"
+    params.append(id_produto)
+        
+    cursor.execute(query, tuple(params))
+    conn.commit()
+    conn.close()
+    return True
+
 def entrada_estoque():
     print("\n--- Entrada de Estoque  ---")
     try:
