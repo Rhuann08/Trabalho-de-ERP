@@ -172,7 +172,7 @@ def excluir_produto():
         conn.close()
 
 def exibir_menu():
-    print("\n--- Mini-ERP de Estoque ------------------")
+    print("\n--- Sistema ERP de Estoque ------------------")
     print("1. Cadastrar Produto")
     print("2. Movimentação de Estoque")
     print("3. Excluir Produto")
