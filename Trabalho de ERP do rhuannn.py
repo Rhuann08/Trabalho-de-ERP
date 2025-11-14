@@ -320,11 +320,42 @@ def gerar_dashboard_todos():
     print("\nTodos os três Dashboards foram salvos no diretório.")
 
 def exibir_menu():
-    print("\n--- Sistema ERP de Estoque ------------------")
+    print("\n--- sistema ERP de Estoque  ---------------")
     print("1. Cadastrar Produto")
     print("2. Movimentação de Estoque")
     print("3. Excluir Produto")
     print("4. Mostrar Relatório Gerencial")
-    print("5. Dashboard")
+    print("5. Gerar Dashboards")
     print("6. Sair do Programa")
-    print("--------------------------------------------")
+    print("---------------------------------------------")
+
+def main():
+    criar_tabela()
+
+    while True:
+        exibir_menu()
+        
+        try:
+            opcao = int(input("Escolha uma opção (1-6): "))
+        except ValueError:
+            print("Opção inválida! Por favor, digite um número.")
+            continue
+
+        if opcao == 1:
+            cadastrar_produto()
+        elif opcao == 2:
+            menu_movimentacao()
+        elif opcao == 3:
+            excluir_produto()
+        elif opcao == 4:
+            mostrar_relatorio()
+        elif opcao == 5:
+            gerar_dashboard_todos()
+        elif opcao == 6:
+            print("Encerrando o sistema.")
+            break
+        else:
+            print("Opção não existe. Escolha um número de 1 a 6.")
+
+
+main()
