@@ -3,20 +3,20 @@ Trabalho de ERP do rhuannn
 Este e o meu projeto para a  professora Karla
 
 Tecnologias Usadas:
- Python 3
- SQLite3 (Para salvar os dados)
- Matplotlib (Para gerar o grafico do Dashboard)
- datetime (Para registrar e calcular o Tempo de Permanencia dos itens)
- pandas(para manipular dados)
- numpy(para calculos)
+ - Python 3
+ - SQLite3 (Para salvar os dados)
+ - Matplotlib (Para gerar o grafico do Dashboard)
+ - datetime (Para registrar e calcular o Tempo de Permanencia dos itens)
+ - pandas(para manipular dados)
+ - numpy(para calculos)
 
 Funcionalidades Implementadas:
 
 1. Cadastro Persistente: Salva produtos no banco de dados SQLite (arquivo estoque.db).
 2. Movimentacao de Estoque: Funcoes separadas para Entrada (Reposicao) e Saida (Venda), atualizando a quantidade no banco.
 3. Exclusao: Remove produtos pelo ID do banco.
-4. Relatorio Gerencial: Exibe o Custo Total do Estoque e lista produtos no Estoque.
-5. Dashboard : Gera 3 grafico: ABC,BARRA, Dispersão.
+4. Relatorio Gerencial: Exibe o Custo de manutenção de Estoque e lista produtos no Estoque.
+5. Dashboard : Gera 3 grafico: ABC, Barra, Dispersão.
 6. Sair: Encerra o programa.
 
 Como Usar
