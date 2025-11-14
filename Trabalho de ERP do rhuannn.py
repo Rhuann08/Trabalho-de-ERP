@@ -1,5 +1,7 @@
 import sqlite3
 import matplotlib.pyplot as plt
+import pandas as pd
+import numpy as np
 from datetime import datetime
 
 def conectar_bd():
@@ -282,19 +284,42 @@ def gerar_dashboard_todos():
     dados_abc = cursor.fetchall()
     
     if dados_abc:
-        categorias = [d[0] for d in dados_abc]
-        custos = [d[1] for d in dados_abc]
         
-        plt.figure(figsize=(8, 5))
-        plt.bar(categorias, custos, color='#1f77b4', alpha=0.8)
-        plt.title('Dashboard 1: Curva ABC (Custo por Categoria)')
-        plt.xlabel('Categoria do Produto')
-        plt.ylabel('Custo Total em Estoque (R$)')
-        plt.xticks(rotation=45, ha='right')
-        plt.grid(axis='y', linestyle='--')
+        df_abc = pd.DataFrame(dados_abc, columns=['Categoria', 'Valor_Total'])
+        
+        df_abc = df_abc.sort_values(by='Valor_Total', ascending=False).reset_index(drop=True)
+        
+        df_abc['Percentual_Valor_Acumulado'] = (df_abc['Valor_Total'].cumsum() / df_abc['Valor_Total'].sum()) * 100
+        
+        df_abc['Percentual_Itens_Acumulado'] = (df_abc.index + 1) / len(df_abc) * 100
+        
+        limite_A = 80
+        limite_B = 95
+        
+        x_limite_A = df_abc['Percentual_Itens_Acumulado'][df_abc['Percentual_Valor_Acumulado'] <= limite_A].max()
+        x_limite_B = df_abc['Percentual_Itens_Acumulado'][df_abc['Percentual_Valor_Acumulado'] <= limite_B].max()
+        
+        if pd.isna(x_limite_A): x_limite_A = df_abc['Percentual_Itens_Acumulado'].iloc[-1]
+        if pd.isna(x_limite_B): x_limite_B = df_abc['Percentual_Itens_Acumulado'].iloc[-1]
+        
+        plt.figure(figsize=(10, 6))
+        plt.plot(df_abc['Percentual_Itens_Acumulado'], df_abc['Percentual_Valor_Acumulado'], marker='o', linestyle='-', color='skyblue', label='Curva ABC')
+
+        plt.axvline(x=x_limite_A, color='red', linestyle='--', label=f'Limite A ({limite_A}%)')
+        plt.axhline(y=limite_A, color='red', linestyle='--')
+
+        plt.axvline(x=x_limite_B, color='green', linestyle='--', label=f'Limite B ({limite_B - limite_A}%)')
+        plt.axhline(y=limite_B, color='green', linestyle='--')
+
+        plt.title('Dashboard 1: Curva ABC de Classificação (Valor vs. Categorias)')
+        plt.xlabel('Percentual Acumulado de Categorias (%)')
+        plt.ylabel('Percentual Acumulado de Custo Total (%)')
+        plt.grid(True, linestyle=':', alpha=0.7)
+        plt.legend()
         plt.tight_layout()
-        plt.savefig('dashboard_1_curva_abc_custo.png')
+        plt.savefig('dashboard_1_curva_abc_avancada.png')
         plt.show()
+        
     else:
         print("  [AVISO] Sem dados de custo para Curva ABC.")
 
