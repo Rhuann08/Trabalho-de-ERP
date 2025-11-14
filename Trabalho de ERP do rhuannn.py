@@ -262,8 +262,12 @@ def mostrar_relatorio():
             diferenca = data_final - data_inicial
             dias_em_estoque_str = str(diferenca.days) + " dias"
 
-        linha = f"| {id:<3} | {nome:<20} | {categoria:<15} | R$ {preco:.2f} | {quantidade:<5} | {status:<10} | {dias_em_estoque_str:<20} |"
-        print(linha)
+        linha_dados = f"| {id:<3} | {nome:<20} | {categoria:<15} | R$ {preco:.2f} | {quantidade:<5} | {status:<10} | {dias_em_estoque_str:<17} |"
+       
+        if status == "BAIXO-[ALERTA]":
+            print("> " + linha_dados + " <")
+        else:
+            print(linha_dados)
 
     custo_manutencao_anual = total_custo_estoque * TAXA_MANUTENCAO_ANUAL
     
